@@ -1,0 +1,39 @@
+<div class="calendar-scroll" tabindex="0" role="region" aria-label="<%= l(calendar.month, format: :month) %>のカレンダー。横にスクロールできます">
+  <table class="calendar">
+    <caption class="visually-hidden"><%= l(calendar.month, format: :month) %></caption>
+    <thead>
+      <tr>
+        <% InterviewCalendar::WEEKDAYS.each do |day| %>
+          <th scope="col"><%= day %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% calendar.weeks.each do |week| %>
+        <tr>
+          <% week.each do |date| %>
+            <td class="<%= "is-outside" if date.month != calendar.month.month %> <%= "is-today" if date == Date.current %>">
+              <time datetime="<%= date.iso8601 %>">
+                <span class="visually-hidden"><%= l(date, format: :long) %></span>
+                <span aria-hidden="true"><%= date.day %></span>
+              </time>
+              <% events = calendar.events_on(date) %>
+              <% if events.any? %>
+                <ul>
+                  <% events.each do |interview| %>
+                    <li>
+                      <%= link_to interview_path(interview), aria: { label: "#{jp_time(interview.starts_at)} #{interview.job_application.company_name} #{interview.round_name}" } do %>
+                        <span class="cal-time"><%= interview.starts_at.strftime("%H:%M") %></span>
+                        <span class="cal-name"><%= interview.job_application.company_name %></span>
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

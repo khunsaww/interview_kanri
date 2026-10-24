@@ -1,0 +1,171 @@
+<% content_for :title, "ダッシュボード" %>
+<div class="page-header">
+  <div>
+    <h1>ダッシュボード</h1>
+    <p class="lede"><%= current_user.name %>さんの選考状況です。</p>
+  </div>
+  <div class="header-actions">
+    <%= link_to "応募を追加", new_job_application_path, class: "button" %>
+    <%= render "shared/sample_actions" %>
+  </div>
+</div>
+
+<% if !@has_real && !@has_samples %>
+  <div class="empty">
+    <h2>記録はまだありません</h2>
+    <p>応募を追加するか、サンプルデータで画面の動きを確認できます。サンプルにはバッジが付きます。</p>
+  </div>
+<% elsif !@has_real && @has_samples && !@stats.include_sample %>
+  <p class="banner" role="status">自分の記録はまだありません。下の件数はサンプルを除いています。</p>
+<% end %>
+<% if @stats.include_sample %>
+  <p class="banner" role="status">サンプルデータを含めて集計しています。</p>
+<% end %>
+
+<section class="section" aria-labelledby="period-heading">
+  <h2 id="period-heading">集計期間</h2>
+  <nav class="segment" aria-label="集計期間">
+    <% Period::KEYS.each do |key| %>
+      <% query = { period: key } %>
+      <% query[:include_sample] = "1" if @stats.include_sample %>
+      <%= link_to Period.label(key), root_path(query), { class: ("is-current" if @stats.period_key == key) }.merge(current_attr(@stats.period_key == key)) %>
+    <% end %>
+  </nav>
+  <p>
+    <% if @stats.include_sample %>
+      <%= link_to "サンプルを集計から外す", root_path(period: @stats.period_key) %>
+    <% else %>
+      <%= link_to "サンプルを含めて集計", root_path(period: @stats.period_key, include_sample: 1) %>
+    <% end %>
+  </p>
+</section>
+
+<section class="section" aria-labelledby="summary-heading">
+  <h2 id="summary-heading">概要</h2>
+  <div class="stats">
+    <article class="stat">
+      <h3>応募総数</h3>
+      <p><strong><%= @stats.total_count %></strong><span class="unit">件</span></p>
+    </article>
+    <article class="stat">
+      <h3>内定数</h3>
+      <p><strong><%= @stats.offer_count %></strong><span class="unit">件</span></p>
+    </article>
+    <article class="stat">
+      <h3>返信率</h3>
+      <p><strong><%= percent_text(@stats.reply_rate) %></strong></p>
+      <% if @stats.reply_denominator.positive? %>
+        <p class="hint"><%= @stats.reply_numerator %> / <%= @stats.reply_denominator %>件</p>
+      <% else %>
+        <p class="hint">対象の応募がありません</p>
+      <% end %>
+    </article>
+    <article class="stat">
+      <h3>準備の完了率</h3>
+      <p><strong><%= percent_text(@stats.task_completion_rate) %></strong></p>
+      <% if @stats.task_total.positive? %>
+        <p class="hint"><%= @stats.task_completed %> / <%= @stats.task_total %>件</p>
+      <% else %>
+        <p class="hint">対象のタスクがありません</p>
+      <% end %>
+    </article>
+  </div>
+  <details class="definition">
+    <summary>集計の定義</summary>
+    <ul>
+      <li>応募総数と選考状況は、応募日が期間内の応募です。応募日がない場合は登録日で判断します。</li>
+      <li>返信率は、書類選考・面接・内定・不採用の件数を、気になるを除いた応募件数で割ったものです。辞退は分母だけに入ります。</li>
+      <li>内定数は、ステータスが内定の件数です。</li>
+      <li>準備の完了率は、期限が期間内のタスクです。期限がない場合は登録日が期間内のものを数えます。</li>
+      <li>直近の面接は今日以降で、集計期間では絞りません。</li>
+      <li>サンプルデータは、含めるを選ばない限り集計から除きます。</li>
+    </ul>
+  </details>
+</section>
+
+<section class="section" aria-labelledby="status-heading">
+  <h2 id="status-heading">選考状況</h2>
+  <ul class="status-counts">
+    <% JobApplication::STATUSES.each do |status| %>
+      <li>
+        <%= status_tag(status) %>
+        <%= link_to "#{@stats.status_counts[status]}件", job_applications_path(status: status) %>
+      </li>
+    <% end %>
+  </ul>
+  <p class="hint">件数は選択中の期間です。リンク先はステータスだけで絞り込みます。</p>
+</section>
+
+<div class="split">
+  <section class="section" aria-labelledby="upcoming-heading">
+    <h2 id="upcoming-heading">直近の面接</h2>
+    <% upcoming = @stats.upcoming_interviews %>
+    <% if upcoming.empty? %>
+      <p>予定されている面接はありません。</p>
+    <% else %>
+      <ul class="plain-list">
+        <% upcoming.each do |interview| %>
+          <li>
+            <%= link_to interview_path(interview) do %>
+              <time datetime="<%= interview.starts_at.iso8601 %>"><%= jp_time(interview.starts_at) %></time>
+              <%= interview.job_application.company_name %>
+              <%= interview.round_name %>
+            <% end %>
+            <%= sample_badge if interview.sample? %>
+            <span class="hint"><%= interview.reminder_label %></span>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+    <%= link_to "面接カレンダーを見る", interviews_path %>
+  </section>
+
+  <section class="section" aria-labelledby="reminder-heading" data-controller="reminder" data-reminder-items-value="<%= reminder_items_json(@stats.due_reminders) %>">
+    <h2 id="reminder-heading">リマインダー</h2>
+    <% reminders = @stats.due_reminders %>
+    <% if reminders.empty? %>
+      <p>いま通知する面接はありません。</p>
+    <% else %>
+      <ul class="plain-list">
+        <% reminders.each do |interview| %>
+          <li>
+            <%= link_to interview_path(interview) do %>
+              <%= interview.job_application.company_name %>
+              <%= jp_time(interview.starts_at) %>
+              （<%= interview.reminder_label %>）
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+      <button type="button" class="button button-secondary" data-action="reminder#enable">ブラウザ通知を有効にする</button>
+      <p class="hint">ページを開いているときだけ通知します。閉じている間のメール通知はありません。</p>
+    <% end %>
+  </section>
+</div>
+
+<section class="section" aria-labelledby="tasks-heading">
+  <h2 id="tasks-heading">期限の近い準備タスク</h2>
+  <% tasks = @stats.open_tasks %>
+  <% if tasks.empty? %>
+    <p>未完了の準備タスクはありません。</p>
+  <% else %>
+    <ul class="plain-list">
+      <% tasks.each do |task| %>
+        <li>
+          <%= link_to task.job_application do %>
+            <%= task.category_label %>：<%= task.title %>
+          <% end %>
+          <% if task.due_on.present? %>
+            <time datetime="<%= task.due_on.iso8601 %>">期限 <%= jp_date(task.due_on) %></time>
+          <% else %>
+            <span>期限未設定</span>
+          <% end %>
+          <% if task.overdue? %>
+            <strong class="overdue">期限を過ぎています</strong>
+          <% end %>
+          <%= sample_badge if task.sample? %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>

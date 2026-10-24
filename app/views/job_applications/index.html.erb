@@ -1,0 +1,44 @@
+<% content_for :title, "応募" %>
+<div class="page-header">
+  <div>
+    <h1>応募</h1>
+    <p class="lede">会社、選考状況、次のアクションを一覧します。</p>
+  </div>
+  <%= link_to "応募を追加", new_job_application_path, class: "button" %>
+</div>
+
+<%= render "filters", query: @query %>
+
+<% if @query.errors.any? %>
+  <div class="form-errors" role="alert">
+    <ul>
+      <% @query.errors.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<% if @job_applications.empty? %>
+  <% if @query.filtering? %>
+    <div class="empty">
+      <h2>条件に一致する応募はありません</h2>
+      <p>キーワードや期間を変えるか、条件をクリアしてください。</p>
+      <%= link_to "条件をクリア", job_applications_path, class: "button button-secondary" %>
+    </div>
+  <% else %>
+    <div class="empty">
+      <h2>応募はまだありません</h2>
+      <p>会社名や職種を記録すると、ここに一覧が表示されます。</p>
+      <%= link_to "応募を追加", new_job_application_path, class: "button" %>
+      <%= render "shared/sample_actions" %>
+    </div>
+  <% end %>
+<% else %>
+  <p class="result-count"><%= @job_applications.size %>件</p>
+  <div class="record-list">
+    <% @job_applications.each do |application| %>
+      <%= render "application", application: application %>
+    <% end %>
+  </div>
+<% end %>

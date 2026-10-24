@@ -1,0 +1,54 @@
+<% if interviews.empty? %>
+  <div class="empty">
+    <h2>面接はありません</h2>
+    <p>応募の詳細、または「面接を追加」から日時を登録できます。</p>
+    <%= link_to "面接を追加", new_interview_path, class: "button" %>
+  </div>
+<% else %>
+  <p class="result-count"><%= interviews.size %>件</p>
+  <div class="record-list">
+    <% interviews.each do |interview| %>
+      <article class="record card">
+        <header class="record-header">
+          <h2><%= link_to interview.job_application.company_name, interview %></h2>
+          <div class="record-tags">
+            <%= sample_badge if interview.sample? %>
+            <span class="status"><%= interview.format_label %></span>
+          </div>
+        </header>
+        <p><%= interview.round_name %></p>
+        <dl>
+          <div>
+            <dt>日時</dt>
+            <dd>
+              <time datetime="<%= interview.starts_at.iso8601 %>"><%= jp_time(interview.starts_at) %></time>
+              <% if interview.ends_at.present? %>
+                〜 <%= interview.ends_at.strftime("%H:%M") %>
+              <% end %>
+            </dd>
+          </div>
+          <div>
+            <dt>面接官</dt>
+            <dd><%= interview.interviewer.presence || "未設定" %></dd>
+          </div>
+          <div>
+            <dt>場所・URL</dt>
+            <dd>
+              <% if interview.meeting_url.present? %>
+                <%= link_to "会議URL", interview.meeting_url, target: "_blank", rel: "noopener noreferrer" %>
+              <% end %>
+              <%= interview.place.presence %>
+              <% if interview.meeting_url.blank? && interview.place.blank? %>
+                未設定
+              <% end %>
+            </dd>
+          </div>
+          <div>
+            <dt>リマインダー</dt>
+            <dd><%= interview.reminder_label %></dd>
+          </div>
+        </dl>
+      </article>
+    <% end %>
+  </div>
+<% end %>

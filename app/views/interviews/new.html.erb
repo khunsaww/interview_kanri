@@ -1,0 +1,13 @@
+<% content_for :title, "面接を追加" %>
+<div class="page-header">
+  <h1>面接を追加</h1>
+</div>
+<% if @applications.empty? %>
+  <div class="empty">
+    <h2>先に応募を登録してください</h2>
+    <p>面接は応募に紐づけて記録します。</p>
+    <%= link_to "応募を追加", new_job_application_path, class: "button" %>
+  </div>
+<% else %>
+  <%= render "form", interview: @interview, applications: @applications, lock_application: params[:job_application_id].present? %>
+<% end %>

@@ -1,0 +1,132 @@
+<% content_for :title, @job_application.company_name %>
+<div class="page-header">
+  <div>
+    <p class="hint"><%= link_to "応募一覧へ", job_applications_path %></p>
+    <h1><%= @job_application.company_name %></h1>
+    <p class="lede"><%= @job_application.job_title %></p>
+    <div class="record-tags">
+      <%= sample_badge if @job_application.sample? %>
+      <%= status_tag(@job_application.status) %>
+    </div>
+  </div>
+  <div class="header-actions">
+    <%= link_to "編集", edit_job_application_path(@job_application), class: "button" %>
+    <%= button_to "削除", @job_application, method: :delete, class: "button button-danger", data: { turbo_confirm: "この応募と、紐づく面接・準備タスク・履歴を削除します。よろしいですか？" } %>
+  </div>
+</div>
+
+<% if @job_application.sample? %>
+  <p class="banner" role="status">これはサンプルデータです。初期状態の統計には含まれません。</p>
+<% end %>
+
+<section class="section card" aria-labelledby="detail-heading">
+  <h2 id="detail-heading">応募情報</h2>
+  <dl class="detail-list">
+    <div>
+      <dt>応募日</dt>
+      <dd><%= jp_date(@job_application.applied_on) %></dd>
+    </div>
+    <div>
+      <dt>勤務地</dt>
+      <dd><%= @job_application.location.presence || "未設定" %></dd>
+    </div>
+    <div>
+      <dt>求人ページ</dt>
+      <dd>
+        <% if @job_application.job_url.present? %>
+          <%= link_to @job_application.job_url, @job_application.job_url, target: "_blank", rel: "noopener noreferrer" %>
+        <% else %>
+          未設定
+        <% end %>
+      </dd>
+    </div>
+    <div>
+      <dt>担当者</dt>
+      <dd><%= @job_application.contact_name.presence || "未設定" %></dd>
+    </div>
+    <div>
+      <dt>採用担当者の連絡先</dt>
+      <dd><%= @job_application.contact_info.presence || "未設定" %></dd>
+    </div>
+    <div>
+      <dt>次のアクション</dt>
+      <dd>
+        <%= @job_application.next_action.presence || "未設定" %>
+        <% if @job_application.next_action_on.present? %>
+          （<%= jp_date(@job_application.next_action_on) %>）
+        <% end %>
+      </dd>
+    </div>
+  </dl>
+  <% if @job_application.memo.present? %>
+    <h3>メモ</h3>
+    <div class="memo"><%= simple_format(@job_application.memo) %></div>
+  <% end %>
+  <% if @job_application.documents.attached? %>
+    <h3>添付ファイル</h3>
+    <ul class="file-list">
+      <% @job_application.documents.each do |document| %>
+        <li>
+          <%= link_to document.filename, rails_blob_path(document, disposition: "attachment") %>
+          （<%= number_to_human_size(document.byte_size) %>）
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>
+
+<section class="section" aria-labelledby="history-heading">
+  <h2 id="history-heading">選考の履歴</h2>
+  <ol class="timeline">
+    <% @status_changes.each do |change| %>
+      <li>
+        <time datetime="<%= change.changed_on.iso8601 %>"><%= jp_date(change.changed_on) %></time>
+        <% if change.from_status.blank? %>
+          <span>登録</span>
+          <%= status_tag(change.to_status) %>
+        <% else %>
+          <%= status_tag(change.from_status) %>
+          <span>から</span>
+          <%= status_tag(change.to_status) %>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+</section>
+
+<section class="section" aria-labelledby="interviews-heading">
+  <div class="section-heading">
+    <h2 id="interviews-heading">面接</h2>
+    <%= link_to "面接を追加", new_job_application_interview_path(@job_application), class: "button button-secondary" %>
+  </div>
+  <% if @interviews.empty? %>
+    <p>登録された面接はありません。</p>
+  <% else %>
+    <ul class="plain-list">
+      <% @interviews.each do |interview| %>
+        <li>
+          <%= link_to interview_path(interview) do %>
+            <time datetime="<%= interview.starts_at.iso8601 %>"><%= jp_time(interview.starts_at) %></time>
+            <%= interview.round_name %>
+            <%= interview.format_label %>
+          <% end %>
+          <% if interview.interviewer.present? %>
+            <span>面接官 <%= interview.interviewer %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>
+
+<section class="section" aria-labelledby="tasks-heading">
+  <div class="section-heading">
+    <h2 id="tasks-heading">準備タスク</h2>
+    <%= link_to "タスクを追加", new_job_application_preparation_task_path(@job_application), class: "button button-secondary" %>
+  </div>
+  <% if @tasks.empty? %>
+    <p>準備タスクはありません。企業研究やお礼メールなどを追加できます。</p>
+  <% else %>
+    <%= render partial: "preparation_tasks/task", collection: @tasks, as: :task %>
+  <% end %>
+</section>

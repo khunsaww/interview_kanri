@@ -1,0 +1,54 @@
+<%= form_with url: job_applications_path, method: :get, class: "filters card" do %>
+  <fieldset>
+    <legend>絞り込みと並べ替え</legend>
+    <div class="form-row three">
+      <div class="field">
+        <%= label_tag :q, "キーワード" %>
+        <%= search_field_tag :q, params[:q], placeholder: "会社名・職種・勤務地・次のアクション", aria: { describedby: "q-hint" } %>
+        <p class="hint" id="q-hint">メモや担当者も検索します。</p>
+      </div>
+      <div class="field">
+        <%= label_tag :status, "選考状況" %>
+        <%= select_tag :status, options_for_select([["すべて", ""]] + JobApplication.status_options, params[:status]) %>
+      </div>
+      <div class="field">
+        <%= label_tag :sample, "記録の種類" %>
+        <%= select_tag :sample, options_for_select([["すべて", ""], ["自分の記録", "real"], ["サンプルのみ", "sample"]], params[:sample]) %>
+      </div>
+    </div>
+    <div class="form-row two">
+      <div class="field">
+        <%= label_tag :applied_from, "応募日（開始）" %>
+        <%= date_field_tag :applied_from, params[:applied_from] %>
+      </div>
+      <div class="field">
+        <%= label_tag :applied_to, "応募日（終了）" %>
+        <%= date_field_tag :applied_to, params[:applied_to] %>
+      </div>
+    </div>
+    <div class="form-row two">
+      <div class="field">
+        <%= label_tag :interview_from, "面接日（開始）" %>
+        <%= date_field_tag :interview_from, params[:interview_from] %>
+      </div>
+      <div class="field">
+        <%= label_tag :interview_to, "面接日（終了）" %>
+        <%= date_field_tag :interview_to, params[:interview_to] %>
+      </div>
+    </div>
+    <div class="form-row two">
+      <div class="field">
+        <%= label_tag :sort, "並べ替え" %>
+        <%= select_tag :sort, options_for_select([["応募日", "applied_on"], ["会社名", "company_name"], ["選考状況", "status"], ["面接日", "interview"], ["次のアクション", "next_action"]], query.sort_key) %>
+      </div>
+      <div class="field">
+        <%= label_tag :direction, "順序" %>
+        <%= select_tag :direction, options_for_select([["昇順", "asc"], ["降順", "desc"]], query.direction) %>
+      </div>
+    </div>
+    <div class="form-actions">
+      <%= submit_tag "絞り込む", class: "button" %>
+      <%= link_to "条件をクリア", job_applications_path, class: "button button-secondary" %>
+    </div>
+  </fieldset>
+<% end %>

@@ -1,0 +1,36 @@
+<article class="record card">
+  <header class="record-header">
+    <h2><%= link_to application.company_name, application %></h2>
+    <div class="record-tags">
+      <%= sample_badge if application.sample? %>
+      <%= status_tag(application.status) %>
+    </div>
+  </header>
+  <p class="job-title"><%= application.job_title %></p>
+  <dl>
+    <div>
+      <dt>応募日</dt>
+      <dd><% if application.applied_on.present? %><time datetime="<%= application.applied_on.iso8601 %>"><%= jp_date(application.applied_on) %></time><% else %>未設定<% end %></dd>
+    </div>
+    <div>
+      <dt>勤務地</dt>
+      <dd><%= application.location.presence || "未設定" %></dd>
+    </div>
+    <div>
+      <dt>面接日</dt>
+      <dd><%= interview_summary(application) %></dd>
+    </div>
+    <div>
+      <dt>次のアクション</dt>
+      <dd>
+        <%= application.next_action.presence || "未設定" %>
+        <% if application.next_action_on.present? %>
+          （<time datetime="<%= application.next_action_on.iso8601 %>"><%= jp_date(application.next_action_on) %></time>）
+        <% end %>
+      </dd>
+    </div>
+  </dl>
+  <% if (progress = task_progress(application)) %>
+    <p class="hint">準備タスク <%= progress %></p>
+  <% end %>
+</article>

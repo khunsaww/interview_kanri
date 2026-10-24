@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title><%= content_for?(:title) ? "#{yield(:title)} | 面接管理" : "面接管理" %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">本文へスキップ</a>
+    <header class="site-header">
+      <div class="container header-inner">
+        <%= link_to root_path, class: "brand" do %>
+          <span class="brand-mark" aria-hidden="true">面</span>
+          <span>面接管理</span>
+        <% end %>
+        <% if user_signed_in? %>
+          <nav aria-label="主要">
+            <ul>
+              <li><%= link_to "ダッシュボード", root_path, aria: { current: active_nav("dashboard") } %></li>
+              <li><%= link_to "応募", job_applications_path, aria: { current: active_nav("applications") } %></li>
+              <li><%= link_to "面接", interviews_path, aria: { current: active_nav("interviews") } %></li>
+            </ul>
+          </nav>
+          <div class="account">
+            <span><%= current_user.name %></span>
+            <%= link_to "アカウント", edit_user_registration_path %>
+            <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "button-quiet" %>
+          </div>
+        <% else %>
+          <nav aria-label="アカウント" class="account">
+            <%= link_to "ログイン", new_user_session_path %>
+            <%= link_to "新規登録", new_user_registration_path %>
+          </nav>
+        <% end %>
+      </div>
+    </header>
+    <main id="main" tabindex="-1" class="container">
+      <%= render "shared/flash" %>
+      <%= yield %>
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <p>応募と面接の記録は、ログインしたアカウントごとにデータベースへ保存されます。</p>
+      </div>
+    </footer>
+  </body>
+</html>

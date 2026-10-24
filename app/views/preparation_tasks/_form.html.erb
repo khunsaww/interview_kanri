@@ -1,0 +1,53 @@
+<% form_url = if task.persisted?
+     preparation_task_path(task)
+   elsif interview
+     interview_preparation_tasks_path(interview)
+   else
+     job_application_preparation_tasks_path(job_application)
+   end %>
+<%= form_with model: task, url: form_url, class: "form card", data: { controller: "task-form" } do |f| %>
+  <%= render "shared/form_errors", record: task %>
+
+  <div class="field">
+    <%= required_label f, :category %>
+    <%= f.select :category, PreparationTask.category_options, {}, required: true, data: { task_form_target: "category", action: "change->task-form#fill" }, aria: field_aria(task, :category) %>
+    <%= field_error task, :category %>
+  </div>
+
+  <div class="field">
+    <%= required_label f, :title %>
+    <%= f.text_field :title, required: true, maxlength: 120, data: { task_form_target: "title" }, aria: field_aria(task, :title, hint_id: "task-title-hint") %>
+    <p class="hint" id="task-title-hint">種類を選ぶと、内容が空のときだけ例が入ります。</p>
+    <%= field_error task, :title %>
+  </div>
+
+  <div class="field">
+    <%= f.label :interview_id, "紐づける面接" %>
+    <%= f.collection_select :interview_id, job_application.interviews.order(:starts_at), :id, :choice_label, { include_blank: "応募全体（面接に紐づけない）" }, aria: field_aria(task, :interview_id) %>
+    <%= field_error task, :interview_id %>
+  </div>
+
+  <div class="field">
+    <%= f.label :due_on %>
+    <%= f.date_field :due_on, aria: field_aria(task, :due_on) %>
+    <%= field_error task, :due_on %>
+  </div>
+
+  <div class="field">
+    <%= f.label :memo %>
+    <%= f.text_area :memo, maxlength: 2000, aria: field_aria(task, :memo) %>
+    <%= field_error task, :memo %>
+  </div>
+
+  <% if task.persisted? %>
+    <div class="field checkbox">
+      <%= f.check_box :completed %>
+      <%= f.label :completed, "完了にする" %>
+    </div>
+  <% end %>
+
+  <div class="form-actions">
+    <%= f.submit task.persisted? ? "更新する" : "追加する", class: "button" %>
+    <%= link_to "キャンセル", task.persisted? && task.interview_id.present? ? interview_path(task.interview_id) : job_application_path(job_application), class: "button button-secondary" %>
+  </div>
+<% end %>

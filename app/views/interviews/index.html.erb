@@ -1,0 +1,52 @@
+<% content_for :title, "面接" %>
+<div class="page-header">
+  <div>
+    <h1>面接</h1>
+    <p class="lede">
+      <% if @show_all %>
+        すべての面接
+      <% else %>
+        <%= l(@month, format: :month) %>
+      <% end %>
+    </p>
+  </div>
+  <%= link_to "面接を追加", new_interview_path, class: "button" %>
+</div>
+
+<nav class="segment" aria-label="表示の切り替え">
+  <%= link_to "カレンダー", interviews_path(view: "calendar", month: @month.strftime("%Y-%m"), q: params[:q]), { class: ("is-current" if @view == "calendar") }.merge(current_attr(@view == "calendar")) %>
+  <%= link_to "一覧", interviews_path(view: "list", month: (@show_all ? "all" : @month.strftime("%Y-%m")), q: params[:q], direction: @direction), { class: ("is-current" if @view == "list") }.merge(current_attr(@view == "list")) %>
+</nav>
+
+<%= form_with url: interviews_path, method: :get, class: "filters card" do %>
+  <%= hidden_field_tag :view, @view %>
+  <%= hidden_field_tag :month, (@show_all ? "all" : @month.strftime("%Y-%m")) unless @view == "calendar" %>
+  <%= hidden_field_tag :month, @month.strftime("%Y-%m") if @view == "calendar" %>
+  <div class="field">
+    <%= label_tag :q, "キーワード" %>
+    <%= search_field_tag :q, params[:q], placeholder: "会社名・選考回・面接官・場所" %>
+  </div>
+  <%= submit_tag "絞り込む", class: "button" %>
+<% end %>
+
+<% if @view == "calendar" %>
+  <div class="calendar-toolbar">
+    <%= link_to "前月", interviews_path(view: "calendar", month: @calendar.prev_param, q: params[:q]), class: "button button-secondary" %>
+    <p class="calendar-title"><%= l(@month, format: :month) %></p>
+    <%= link_to "今月", interviews_path(view: "calendar", q: params[:q]), class: "button button-secondary" %>
+    <%= link_to "翌月", interviews_path(view: "calendar", month: @calendar.next_param, q: params[:q]), class: "button button-secondary" %>
+  </div>
+  <%= render "calendar", calendar: @calendar %>
+<% else %>
+  <div class="calendar-toolbar">
+    <% unless @show_all %>
+      <%= link_to "前月", interviews_path(view: "list", month: @calendar.prev_param, q: params[:q], direction: @direction), class: "button button-secondary" %>
+      <%= link_to "今月", interviews_path(view: "list", q: params[:q], direction: @direction), class: "button button-secondary" %>
+      <%= link_to "翌月", interviews_path(view: "list", month: @calendar.next_param, q: params[:q], direction: @direction), class: "button button-secondary" %>
+    <% end %>
+    <%= link_to(@show_all ? "この月の一覧" : "全期間の一覧", interviews_path(view: "list", month: (@show_all ? @month.strftime("%Y-%m") : "all"), q: params[:q], direction: @direction), class: "button button-secondary") %>
+    <%= link_to "日付の昇順", interviews_path(view: "list", month: (@show_all ? "all" : @month.strftime("%Y-%m")), q: params[:q], direction: "asc"), **current_attr(@direction == "asc") %>
+    <%= link_to "日付の降順", interviews_path(view: "list", month: (@show_all ? "all" : @month.strftime("%Y-%m")), q: params[:q], direction: "desc"), **current_attr(@direction == "desc") %>
+  </div>
+  <%= render "list", interviews: @list_interviews %>
+<% end %>

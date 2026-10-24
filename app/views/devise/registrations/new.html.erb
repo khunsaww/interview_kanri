@@ -1,0 +1,26 @@
+<% content_for :title, "新規登録" %>
+<section class="auth-card">
+  <h1>新規登録</h1>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "form" }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+    <div class="field">
+      <%= f.label :name, "名前（必須）" %>
+      <%= f.text_field :name, autofocus: true, autocomplete: "name", required: true, maxlength: 40 %>
+    </div>
+    <div class="field">
+      <%= f.label :email, "メールアドレス（必須）" %>
+      <%= f.email_field :email, autocomplete: "email", required: true %>
+    </div>
+    <div class="field">
+      <%= f.label :password, "パスワード（必須）" %>
+      <%= f.password_field :password, autocomplete: "new-password", required: true, aria: { describedby: "password-hint" } %>
+      <p class="hint" id="password-hint">8文字以上にしてください。</p>
+    </div>
+    <div class="field">
+      <%= f.label :password_confirmation, "パスワード（確認・必須）" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true %>
+    </div>
+    <%= f.submit "登録する", class: "button" %>
+  <% end %>
+  <%= render "devise/shared/links" %>
+</section>

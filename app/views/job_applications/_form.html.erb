@@ -1,0 +1,120 @@
+<%= form_with model: job_application, class: "form card" do |f| %>
+  <%= render "shared/form_errors", record: job_application %>
+
+  <div class="form-row two">
+    <div class="field">
+      <%= required_label f, :company_name %>
+      <%= f.text_field :company_name, required: true, maxlength: 80, autocomplete: "organization", aria: field_aria(job_application, :company_name) %>
+      <%= field_error job_application, :company_name %>
+    </div>
+    <div class="field">
+      <%= required_label f, :job_title %>
+      <%= f.text_field :job_title, required: true, maxlength: 80, aria: field_aria(job_application, :job_title) %>
+      <%= field_error job_application, :job_title %>
+    </div>
+  </div>
+
+  <div class="form-row two">
+    <div class="field">
+      <%= f.label :applied_on %>
+      <%= f.date_field :applied_on, aria: field_aria(job_application, :applied_on, hint_id: "applied-on-hint") %>
+      <p class="hint" id="applied-on-hint">「気になる」以外では必須です。</p>
+      <%= field_error job_application, :applied_on %>
+    </div>
+    <div class="field">
+      <%= f.label :location %>
+      <%= f.text_field :location, maxlength: 80, aria: field_aria(job_application, :location) %>
+      <%= field_error job_application, :location %>
+    </div>
+  </div>
+
+  <div class="field">
+    <%= f.label :job_url %>
+    <%= f.url_field :job_url, maxlength: 500, placeholder: "https://", aria: field_aria(job_application, :job_url) %>
+    <%= field_error job_application, :job_url %>
+  </div>
+
+  <div class="form-row two">
+    <div class="field">
+      <%= f.label :contact_name %>
+      <%= f.text_field :contact_name, maxlength: 80, autocomplete: "name", aria: field_aria(job_application, :contact_name) %>
+      <%= field_error job_application, :contact_name %>
+    </div>
+    <div class="field">
+      <%= f.label :contact_info %>
+      <%= f.text_field :contact_info, maxlength: 120, aria: field_aria(job_application, :contact_info, hint_id: "contact-hint") %>
+      <p class="hint" id="contact-hint">メールアドレスや電話番号を書けます。</p>
+      <%= field_error job_application, :contact_info %>
+    </div>
+  </div>
+
+  <div class="form-row two">
+    <div class="field">
+      <%= required_label f, :status %>
+      <%= f.select :status, JobApplication.status_options, {}, aria: field_aria(job_application, :status) %>
+      <%= field_error job_application, :status %>
+    </div>
+    <div class="field">
+      <%= f.label :status_changed_on %>
+      <%= f.date_field :status_changed_on, value: job_application.status_changed_on, aria: field_aria(job_application, :status_changed_on, hint_id: "status-date-hint") %>
+      <p class="hint" id="status-date-hint">選考状況を変えたとき、この日付で履歴に残します。空欄なら今日です。</p>
+      <%= field_error job_application, :status_changed_on %>
+    </div>
+  </div>
+
+  <div class="form-row two">
+    <div class="field">
+      <%= f.label :next_action %>
+      <%= f.text_field :next_action, maxlength: 200, list: "next-action-suggestions", aria: field_aria(job_application, :next_action) %>
+      <datalist id="next-action-suggestions">
+        <option value="書類を提出する"></option>
+        <option value="結果連絡を待つ"></option>
+        <option value="面接日程を調整する"></option>
+        <option value="お礼メールを送る"></option>
+        <option value="条件を確認する"></option>
+      </datalist>
+      <%= field_error job_application, :next_action %>
+    </div>
+    <div class="field">
+      <%= f.label :next_action_on %>
+      <%= f.date_field :next_action_on, aria: field_aria(job_application, :next_action_on) %>
+      <%= field_error job_application, :next_action_on %>
+    </div>
+  </div>
+
+  <div class="field">
+    <%= f.label :memo %>
+    <%= f.text_area :memo, maxlength: 5000, aria: field_aria(job_application, :memo) %>
+    <%= field_error job_application, :memo %>
+  </div>
+
+  <div class="field">
+    <%= f.label :documents, "履歴書・ポートフォリオ" %>
+    <%= f.file_field :documents, multiple: true, accept: "application/pdf,image/png,image/jpeg,image/webp", aria: field_aria(job_application, :documents, hint_id: "documents-hint") %>
+    <p class="hint" id="documents-hint">PDF、PNG、JPEG、WebP。1ファイル10MBまで。送信に失敗したときはファイルを選び直してください。</p>
+    <%= field_error job_application, :documents %>
+  </div>
+
+  <% if job_application.persisted? && job_application.documents.attached? %>
+    <fieldset>
+      <legend>添付済みのファイル</legend>
+      <ul class="file-list">
+        <% job_application.documents.each do |document| %>
+          <li>
+            <%= link_to document.filename, rails_blob_path(document, disposition: "attachment") %>
+            （<%= number_to_human_size(document.byte_size) %>）
+            <label class="choice" for="remove_document_<%= document.id %>">
+              <%= check_box_tag "job_application[remove_document_ids][]", document.id, false, id: "remove_document_#{document.id}" %>
+              削除する
+            </label>
+          </li>
+        <% end %>
+      </ul>
+    </fieldset>
+  <% end %>
+
+  <div class="form-actions">
+    <%= f.submit job_application.persisted? ? "更新する" : "登録する", class: "button" %>
+    <%= link_to "キャンセル", job_application.persisted? ? job_application_path(job_application) : job_applications_path, class: "button button-secondary" %>
+  </div>
+<% end %>

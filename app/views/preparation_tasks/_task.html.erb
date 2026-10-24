@@ -1,0 +1,38 @@
+<article class="task <%= "is-done" if task.completed? %> <%= "is-overdue" if task.overdue? %>">
+  <div class="task-main">
+    <p class="task-title">
+      <span class="hint"><%= task.category_label %></span>
+      <%= task.title %>
+      <%= sample_badge if task.sample? %>
+    </p>
+    <p>
+      <% if task.completed? %>
+        <strong>完了</strong>
+        <% if task.completed_at.present? %>
+          <time datetime="<%= task.completed_at.iso8601 %>"><%= jp_time(task.completed_at) %></time>
+        <% end %>
+      <% else %>
+        <strong>未完了</strong>
+      <% end %>
+      <% if task.due_on.present? %>
+        <time datetime="<%= task.due_on.iso8601 %>">期限 <%= jp_date(task.due_on) %></time>
+      <% else %>
+        <span>期限未設定</span>
+      <% end %>
+      <% if task.overdue? %>
+        <strong class="overdue">期限を過ぎています</strong>
+      <% end %>
+      <% if task.interview.present? %>
+        <span>面接: <%= task.interview.round_name %></span>
+      <% end %>
+    </p>
+    <% if task.memo.present? %>
+      <p class="memo"><%= task.memo %></p>
+    <% end %>
+  </div>
+  <div class="task-actions">
+    <%= button_to(task.completed? ? "未完了に戻す" : "完了にする", preparation_task_path(task), method: :patch, class: "button button-secondary", params: { preparation_task: { completed: (task.completed? ? "0" : "1") } }) %>
+    <%= link_to "編集", edit_preparation_task_path(task), class: "button button-secondary" %>
+    <%= button_to "削除", preparation_task_path(task), method: :delete, class: "button button-danger", data: { turbo_confirm: "この準備タスクを削除します。よろしいですか？" } %>
+  </div>
+</article>

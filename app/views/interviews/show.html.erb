@@ -1,0 +1,64 @@
+<% content_for :title, "#{@interview.job_application.company_name}の面接" %>
+<div class="page-header">
+  <div>
+    <p class="hint"><%= link_to @interview.job_application.company_name, @interview.job_application %></p>
+    <h1><%= @interview.round_name %></h1>
+    <p class="lede"><time datetime="<%= @interview.starts_at.iso8601 %>"><%= jp_time(@interview.starts_at) %></time></p>
+    <div class="record-tags">
+      <%= sample_badge if @interview.sample? %>
+      <span class="status"><%= @interview.format_label %></span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <%= link_to "編集", edit_interview_path(@interview), class: "button" %>
+    <%= button_to "削除", @interview, method: :delete, class: "button button-danger", data: { turbo_confirm: "この面接を削除します。紐づく準備タスクも削除されます。よろしいですか？" } %>
+  </div>
+</div>
+
+<section class="section card" aria-labelledby="interview-detail-heading">
+  <h2 id="interview-detail-heading">面接の内容</h2>
+  <dl class="detail-list">
+    <div>
+      <dt>終了日時</dt>
+      <dd><%= @interview.ends_at.present? ? jp_time(@interview.ends_at) : "未設定" %></dd>
+    </div>
+    <div>
+      <dt>面接官</dt>
+      <dd><%= @interview.interviewer.presence || "未設定" %></dd>
+    </div>
+    <div>
+      <dt>会議URL</dt>
+      <dd>
+        <% if @interview.meeting_url.present? %>
+          <%= link_to @interview.meeting_url, @interview.meeting_url, target: "_blank", rel: "noopener noreferrer" %>
+        <% else %>
+          未設定
+        <% end %>
+      </dd>
+    </div>
+    <div>
+      <dt>場所</dt>
+      <dd><%= @interview.place.presence || "未設定" %></dd>
+    </div>
+    <div>
+      <dt>リマインダー</dt>
+      <dd><%= @interview.reminder_label %></dd>
+    </div>
+  </dl>
+  <% if @interview.memo.present? %>
+    <h3>メモ</h3>
+    <div class="memo"><%= simple_format(@interview.memo) %></div>
+  <% end %>
+</section>
+
+<section class="section" aria-labelledby="interview-tasks-heading">
+  <div class="section-heading">
+    <h2 id="interview-tasks-heading">この面接の準備</h2>
+    <%= link_to "タスクを追加", new_interview_preparation_task_path(@interview), class: "button button-secondary" %>
+  </div>
+  <% if @tasks.empty? %>
+    <p>この面接に紐づく準備タスクはありません。</p>
+  <% else %>
+    <%= render partial: "preparation_tasks/task", collection: @tasks, as: :task %>
+  <% end %>
+</section>

@@ -1,0 +1,8 @@
+<% content_for :title, "準備タスクを追加" %>
+<div class="page-header">
+  <div>
+    <p class="hint"><%= link_to @job_application.company_name, @job_application %></p>
+    <h1>準備タスクを追加</h1>
+  </div>
+</div>
+<%= render "form", task: @task, job_application: @job_application, interview: @interview %>

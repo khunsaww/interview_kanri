@@ -1,0 +1,91 @@
+<%= form_with model: interview, class: "form card", data: { controller: "interview-form" } do |f| %>
+  <%= render "shared/form_errors", record: interview %>
+
+  <% if local_assigns[:lock_application] && interview.job_application.present? %>
+    <%= f.hidden_field :job_application_id, value: interview.job_application_id %>
+    <p>応募: <%= link_to interview.job_application.choice_label, interview.job_application %></p>
+  <% else %>
+    <div class="field">
+      <%= f.label :job_application_id, "応募（必須）" %>
+      <%= f.collection_select :job_application_id, applications, :id, :choice_label, { include_blank: "選んでください" }, required: true, aria: field_aria(interview, :job_application) %>
+      <%= field_error interview, :job_application %>
+    </div>
+  <% end %>
+
+  <div class="form-row two">
+    <div class="field">
+      <%= required_label f, :starts_at %>
+      <%= f.datetime_local_field :starts_at, required: true, step: 60, aria: field_aria(interview, :starts_at) %>
+      <%= field_error interview, :starts_at %>
+    </div>
+    <div class="field">
+      <%= f.label :ends_at %>
+      <%= f.datetime_local_field :ends_at, step: 60, aria: field_aria(interview, :ends_at, hint_id: "ends-at-hint") %>
+      <p class="hint" id="ends-at-hint">空欄でも登録できます。</p>
+      <%= field_error interview, :ends_at %>
+    </div>
+  </div>
+
+  <fieldset class="choices">
+    <legend>面接形式（必須）</legend>
+    <% Interview::FORMATS.each do |format| %>
+      <label class="choice">
+        <%= f.radio_button :format, format, data: { action: "interview-form#refresh" } %>
+        <%= Interview.format_label(format) %>
+      </label>
+    <% end %>
+  </fieldset>
+  <%= field_error interview, :format %>
+
+  <div class="form-row two">
+    <div class="field">
+      <%= required_label f, :round_name %>
+      <%= f.text_field :round_name, required: true, maxlength: 40, list: "round-suggestions", aria: field_aria(interview, :round_name) %>
+      <datalist id="round-suggestions">
+        <option value="カジュアル面談"></option>
+        <option value="一次面接"></option>
+        <option value="二次面接"></option>
+        <option value="最終面接"></option>
+        <option value="役員面接"></option>
+      </datalist>
+      <%= field_error interview, :round_name %>
+    </div>
+    <div class="field">
+      <%= f.label :interviewer %>
+      <%= f.text_field :interviewer, maxlength: 80, aria: field_aria(interview, :interviewer) %>
+      <%= field_error interview, :interviewer %>
+    </div>
+  </div>
+
+  <div class="field">
+    <%= f.label :meeting_url %>
+    <%= f.url_field :meeting_url, maxlength: 500, placeholder: "https://", data: { interview_form_target: "url" }, aria: field_aria(interview, :meeting_url, hint_id: "meeting-url-hint") %>
+    <p class="hint" id="meeting-url-hint">オンラインを選んだ場合は必須です。</p>
+    <%= field_error interview, :meeting_url %>
+  </div>
+
+  <div class="field">
+    <%= f.label :place %>
+    <%= f.text_field :place, maxlength: 120, data: { interview_form_target: "place" }, aria: field_aria(interview, :place, hint_id: "place-hint") %>
+    <p class="hint" id="place-hint">対面を選んだ場合は必須です。</p>
+    <%= field_error interview, :place %>
+  </div>
+
+  <div class="field">
+    <%= f.label :remind_minutes_before %>
+    <%= f.select :remind_minutes_before, Interview.remind_options, { include_blank: "通知しない" }, aria: field_aria(interview, :remind_minutes_before, hint_id: "remind-hint") %>
+    <p class="hint" id="remind-hint">ダッシュボードと、ページを開いているときのブラウザ通知で知らせます。メールでは送りません。</p>
+    <%= field_error interview, :remind_minutes_before %>
+  </div>
+
+  <div class="field">
+    <%= f.label :memo %>
+    <%= f.text_area :memo, maxlength: 2000, aria: field_aria(interview, :memo) %>
+    <%= field_error interview, :memo %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.submit interview.persisted? ? "更新する" : "登録する", class: "button" %>
+    <%= link_to "キャンセル", interview.persisted? ? interview_path(interview) : (interview.job_application || interviews_path), class: "button button-secondary" %>
+  </div>
+<% end %>

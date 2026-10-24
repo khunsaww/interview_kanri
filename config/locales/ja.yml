@@ -1,0 +1,121 @@
+ja:
+  date:
+    formats:
+      long: "%Y年%-m月%-d日（%a）"
+      month: "%Y年%-m月"
+    abbr_day_names: [日, 月, 火, 水, 木, 金, 土]
+    day_names: [日曜日, 月曜日, 火曜日, 水曜日, 木曜日, 金曜日, 土曜日]
+  time:
+    formats:
+      long: "%Y年%-m月%-d日（%a） %H:%M"
+    abbr_day_names: [日, 月, 火, 水, 木, 金, 土]
+    day_names: [日曜日, 月曜日, 火曜日, 水曜日, 木曜日, 金曜日, 土曜日]
+  periods:
+    this_month: 今月
+    last_30: 過去30日
+    last_90: 過去90日
+    this_year: 今年
+    all: 全期間
+  filters:
+    invalid_date: 日付は年-月-日の形式で入力してください。
+    date_order: 開始日は終了日より前の日付にしてください。
+  job_applications:
+    statuses:
+      interested: 気になる
+      applied: 応募済み
+      screening: 書類選考
+      interviewing: 面接
+      offered: 内定
+      rejected: 不採用
+      withdrawn: 辞退
+  interviews:
+    formats:
+      online: オンライン
+      onsite: 対面
+      phone: 電話
+    reminders:
+      "15": 15分前
+      "30": 30分前
+      "60": 1時間前
+      "180": 3時間前
+      "1440": 1日前
+  preparation_tasks:
+    categories:
+      research: 企業研究
+      role: 職種の確認
+      practice: 想定質問の練習
+      documents: 履歴書・ポートフォリオの更新
+      follow_up: お礼・フォローアップ
+      other: その他
+  errors:
+    messages:
+      invalid_url: は http または https から始まるURLにしてください
+      invalid_type: はPDF、PNG、JPEG、WebPのいずれかにしてください
+      too_large: は1ファイル10MB以下にしてください
+  activerecord:
+    models:
+      user: ユーザー
+      job_application: 応募
+      interview: 面接
+      preparation_task: 準備タスク
+      status_change: ステータス変更
+    attributes:
+      user:
+        name: 名前
+        email: メールアドレス
+        password: パスワード
+        password_confirmation: パスワード（確認）
+        current_password: 現在のパスワード
+        remember_me: ログイン状態を保つ
+      job_application:
+        company_name: 会社名
+        job_title: 職種
+        applied_on: 応募日
+        job_url: 求人ページのURL
+        location: 勤務地
+        contact_name: 担当者
+        contact_info: 採用担当者の連絡先
+        memo: メモ
+        status: 選考状況
+        status_changed_on: ステータスの変更日
+        next_action: 次のアクション
+        next_action_on: 次のアクションの日付
+        documents: 添付ファイル
+        sample: サンプル
+      interview:
+        job_application: 応募
+        starts_at: 開始日時
+        ends_at: 終了日時
+        format: 面接形式
+        round_name: 選考回
+        interviewer: 面接官
+        meeting_url: 会議URL
+        place: 場所
+        remind_minutes_before: リマインダー
+        memo: メモ
+      preparation_task:
+        category: 種類
+        title: 内容
+        due_on: 期限
+        memo: メモ
+        completed: 完了
+        interview: 面接
+        interview_id: 面接
+        job_application: 応募
+        user: ユーザー
+      status_change:
+        from_status: 変更前
+        to_status: 変更後
+        changed_on: 変更日
+    errors:
+      models:
+        interview:
+          attributes:
+            ends_at:
+              after_start: は開始日時より後にしてください
+        preparation_task:
+          attributes:
+            interview_id:
+              mismatched: は同じ応募の面接を選んでください
+            user:
+              mismatched: が応募の所有者と一致しません

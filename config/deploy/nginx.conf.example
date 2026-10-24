@@ -1,0 +1,27 @@
+upstream interview_kanri {
+    server unix:/var/www/interview_kanri/shared/tmp/sockets/unicorn.sock fail_timeout=0;
+}
+
+server {
+    listen 80;
+    server_name example.com;
+    root /var/www/interview_kanri/current/public;
+
+    location ^~ /assets/ {
+        gzip_static on;
+        expires max;
+        add_header Cache-Control public;
+    }
+
+    location / {
+        try_files $uri @unicorn;
+    }
+
+    location @unicorn {
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        proxy_pass http://interview_kanri;
+    }
+}
